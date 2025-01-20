@@ -4,10 +4,47 @@ import pandas as pd
 import numpy as np
 st.set_page_config(page_title="Price Predictor")
 st.title('Price Predictor')
-with open(r"D:\ml project\house price prediction\df.pkl", 'rb') as file:
-    df = pickle.load(file)
-with open(r"D:\ml project\house price prediction\pipeline.pkl", 'rb') as file:
-    pipeline = pickle.load(file)
+# with open(r"D:\ml project\house price prediction\df.pkl", 'rb') as file:
+#     df = pickle.load(file)
+# with open(r"D:\ml project\house price prediction\pipeline.pkl", 'rb') as file:
+#     pipeline = pickle.load(file)
+
+
+import os
+import pickle
+import streamlit as st
+
+st.set_page_config(page_title="Price Predictor")
+st.title("Price Predictor")
+
+# Get the current directory (the script's location)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Get the parent directory of the current directory
+parent_dir = os.path.dirname(current_dir)
+
+# Load files using the correct relative path (assuming df.pkl is in the parent directory)
+try:
+    with open(os.path.join(parent_dir, "df.pkl"), 'rb') as file:
+        df = pickle.load(file)
+    with open(os.path.join(parent_dir, "pipeline.pkl"), 'rb') as file:
+        pipeline = pickle.load(file)
+    st.write("Loaded data from the correct path.")
+except FileNotFoundError:
+    # Fallback to absolute paths if the files are not found in the parent directory
+    try:
+        with open(r"D:\ml project\house price prediction\df.pkl", 'rb') as file:
+            df = pickle.load(file)
+        with open(r"D:\ml project\house price prediction\pipeline.pkl", 'rb') as file:
+            pipeline = pickle.load(file)
+        st.write("Loaded data from the absolute path.")
+    except FileNotFoundError:
+        st.error("The files df.pkl and pipeline.pkl could not be found. Please upload them.")
+        raise
+
+# UI Elements (your code for the UI remains unchanged)
+
+
 
 #st.dataframe(df)
 
