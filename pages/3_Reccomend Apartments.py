@@ -188,7 +188,7 @@ st.session_state['selected_apartment'] = selected_apartment
 if st.button('Recommend', key='recommend_button'):
     if st.session_state['selected_apartment']:
         recommendation_df = recommend_properties_with_scores(st.session_state['selected_apartment'])
-        st.dataframe(recommendation_df)
+        recommendation_df
     else:
         st.write("Please select an apartment to get recommendations.")
 
