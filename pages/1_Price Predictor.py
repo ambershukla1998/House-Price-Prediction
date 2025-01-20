@@ -2,6 +2,7 @@ import streamlit as st
 import pickle
 import pandas as pd
 import numpy as np
+import os
 st.set_page_config(page_title="Price Predictor")
 st.title('Price Predictor')
 # with open(r"D:\ml project\house price prediction\df.pkl", 'rb') as file:
@@ -10,12 +11,6 @@ st.title('Price Predictor')
 #     pipeline = pickle.load(file)
 
 
-import os
-import pickle
-import streamlit as st
-
-st.set_page_config(page_title="Price Predictor")
-st.title("Price Predictor")
 
 # Get the current directory (the script's location)
 current_dir = os.path.dirname(os.path.abspath(__file__))
