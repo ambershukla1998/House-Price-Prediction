@@ -123,7 +123,33 @@ st.set_page_config(page_title="Price Predictor")
 st.title("Analytics")
 
 # Load pre-saved feature text and dataset
-feature_text = pickle.load(open(r"D:\ml project\house price prediction\datasets\feature_text.pkl", "rb"))
+
+import os
+import pickle
+
+# Get the current directory (the script's location)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Get the parent directory of the current directory
+parent_dir = os.path.dirname(current_dir)
+
+# Try loading feature_text.pkl using the relative path
+try:
+    with open(os.path.join(parent_dir, "datasets", "feature_text.pkl"), 'rb') as file:
+        feature_text = pickle.load(file)
+    print("Loaded feature_text from the relative path.")
+except FileNotFoundError:
+    # Fallback to absolute path if the file is not found
+    try:
+        with open(r"D:\ml project\house price prediction\datasets\feature_text.pkl", 'rb') as file:
+            feature_text = pickle.load(file)
+        print("Loaded feature_text from the absolute path.")
+    except FileNotFoundError:
+        print("The file feature_text.pkl could not be found.")
+
+# feature_text = pickle.load(open(r"D:\ml project\house price prediction\datasets\feature_text.pkl", "rb"))
+
+
 new_df = pd.read_csv(r"D:\ml project\house price prediction\datasets\data_viz1.csv")
 
 # Group data by sector for plotting

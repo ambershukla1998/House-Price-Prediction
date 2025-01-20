@@ -79,10 +79,53 @@ st.set_page_config(page_title="Interactive Apartment Recommendations")
 
 # Load datasets
 # Load the dataset
-location_df = pickle.load(open('D:/ml project/house price prediction/datasets/location_distance.pkl', 'rb'))
-cosine_sim1 = pickle.load(open('D:/ml project/house price prediction/datasets/cosine_sim1.pkl', 'rb'))
-cosine_sim2 = pickle.load(open('D:/ml project/house price prediction/datasets/cosine_sim2.pkl', 'rb'))
-cosine_sim3 = pickle.load(open('D:/ml project/house price prediction/datasets/cosine_sim3.pkl', 'rb'))
+# location_df = pickle.load(open('D:/ml project/house price prediction/datasets/location_distance.pkl', 'rb'))
+# cosine_sim1 = pickle.load(open('D:/ml project/house price prediction/datasets/cosine_sim1.pkl', 'rb'))
+# cosine_sim2 = pickle.load(open('D:/ml project/house price prediction/datasets/cosine_sim2.pkl', 'rb'))
+# cosine_sim3 = pickle.load(open('D:/ml project/house price prediction/datasets/cosine_sim3.pkl', 'rb'))
+########
+import os
+import pickle
+
+# Get the current directory (the script's location)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Get the parent directory of the current directory
+parent_dir = os.path.dirname(current_dir)
+
+# Define a helper function to load a file
+def load_file(filename):
+    # Try loading from relative path
+    try:
+        with open(os.path.join(parent_dir, "datasets", filename), 'rb') as file:
+            return pickle.load(file)
+    except FileNotFoundError:
+        # Fallback to absolute path if file is not found
+        try:
+            with open(f'D:/ml project/house price prediction/datasets/{filename}', 'rb') as file:
+                return pickle.load(file)
+        except FileNotFoundError:
+            print(f"The file {filename} could not be found.")
+            return None
+
+# Load the datasets
+location_df = load_file("location_distance.pkl")
+cosine_sim1 = load_file("cosine_sim1.pkl")
+cosine_sim2 = load_file("cosine_sim2.pkl")
+cosine_sim3 = load_file("cosine_sim3.pkl")
+
+# Check if files were loaded
+if location_df is not None:
+    print("Loaded location_distance.pkl successfully.")
+if cosine_sim1 is not None:
+    print("Loaded cosine_sim1.pkl successfully.")
+if cosine_sim2 is not None:
+    print("Loaded cosine_sim2.pkl successfully.")
+if cosine_sim3 is not None:
+    print("Loaded cosine_sim3.pkl successfully.")
+#######
+
+
 df1 = pd.read_csv(r"D:\ml project\house price prediction\datasets\data_viz1.csv")
 
 
