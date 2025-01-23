@@ -1,0 +1,5 @@
+# Ignore virtual environment
+venv/
+
+# Ignore pipeline.pkl file
+pages/pipeline.pkl
