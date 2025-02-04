@@ -123,7 +123,7 @@ if not os.path.exists("pipeline.pkl"):
 # Load pipeline.pkl
 with open("pipeline.pkl", "rb") as file:
     pipeline = pickle.load(file)
-#st.write("pipeline.pkl loaded successfully!")
+
 
 # UI Elements
 property_type = st.selectbox('Property Type', ['flat', 'House'])
