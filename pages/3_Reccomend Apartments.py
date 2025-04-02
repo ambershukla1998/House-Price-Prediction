@@ -18,7 +18,7 @@ def load_file(filename):
             st.write(f"Successfully loaded {filename}")
             return data
     except FileNotFoundError:
-        st.error(f"File not found at {file_path}. Please make sure the pickle files are in the correct directory.")
+        st.warning(f"File not found at {file_path}. Please upload it.")
         return None
     except pickle.UnpicklingError:
         st.error(f"Error unpickling '{filename}'. The file may be corrupted or incompatible.")
@@ -27,11 +27,32 @@ def load_file(filename):
         st.error(f"Error loading '{filename}': {str(e)}")
         return None
 
-# Load pickle files from the dataset directory
+# Try loading pickle files, if not found, ask the user to upload them
 location_df = load_file("location_distance.pkl")
 cosine_sim1 = load_file("cosine_sim1.pkl")
 cosine_sim2 = load_file("cosine_sim2.pkl")
 cosine_sim3 = load_file("cosine_sim3.pkl")
+
+# If the pickle files are not found, let users upload them
+if location_df is None:
+    uploaded_file = st.file_uploader("Upload location_distance.pkl", type="pkl")
+    if uploaded_file is not None:
+        location_df = pickle.load(uploaded_file)
+
+if cosine_sim1 is None:
+    uploaded_file = st.file_uploader("Upload cosine_sim1.pkl", type="pkl")
+    if uploaded_file is not None:
+        cosine_sim1 = pickle.load(uploaded_file)
+
+if cosine_sim2 is None:
+    uploaded_file = st.file_uploader("Upload cosine_sim2.pkl", type="pkl")
+    if uploaded_file is not None:
+        cosine_sim2 = pickle.load(uploaded_file)
+
+if cosine_sim3 is None:
+    uploaded_file = st.file_uploader("Upload cosine_sim3.pkl", type="pkl")
+    if uploaded_file is not None:
+        cosine_sim3 = pickle.load(uploaded_file)
 
 # Load CSV file
 csv_path = os.path.join(DATASET_DIR, "data_viz1.csv")
@@ -49,7 +70,7 @@ except Exception as e:
 def recommend_properties_with_scores(property_name, top_n=5):
     try:
         if location_df is None or cosine_sim1 is None or cosine_sim2 is None or cosine_sim3 is None:
-            st.error("Required data files are missing. Please ensure the pickle files are loaded correctly.")
+            st.error("Required data files are missing. Please upload the pickle files.")
             return pd.DataFrame()
 
         cosine_sim_matrix = 3 * cosine_sim1 + 5 * cosine_sim2 + 6 * cosine_sim3
