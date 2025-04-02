@@ -8,7 +8,7 @@ import os
 st.set_page_config(page_title="Interactive Apartment Recommendations")
 
 # Define the datasets directory (relative path)
-DATASET_DIR = os.path.join(os.path.dirname(os.getcwd()), "datasets")
+DATASET_DIR = os.path.abspath("./datasets")
 
 # Helper function to load a file
 def load_file(filename):
