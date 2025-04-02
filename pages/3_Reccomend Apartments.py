@@ -15,7 +15,6 @@ def load_file(filename):
     try:
         with open(file_path, 'rb') as file:
             data = pickle.load(file)
-            st.write(f"Successfully loaded {filename}")
             return data
     except FileNotFoundError:
         st.warning(f"File not found at {file_path}. Please upload it.")
@@ -58,7 +57,6 @@ if cosine_sim3 is None:
 csv_path = os.path.join(DATASET_DIR, "data_viz1.csv")
 try:
     df1 = pd.read_csv(csv_path)
-    st.write("CSV file loaded successfully!")
 except FileNotFoundError:
     st.error(f"CSV file not found at {csv_path}")
     df1 = None
