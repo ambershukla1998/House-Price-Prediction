@@ -7,15 +7,8 @@ import os
 
 st.set_page_config(page_title="Interactive Apartment Recommendations")
 
-# Debugging: Display the current working directory and file structure
-st.write("Current working directory:", os.getcwd())
-for root, dirs, files in os.walk("."):
-    st.write(f"Directory: {root}")
-    for file in files:
-        st.write(f" - {file}")
-
 # Define the datasets directory (relative path)
-DATASET_DIR = os.path.join(os.getcwd(), "datasets")
+DATASET_DIR = "./datasets"
 
 # Helper function to load a file
 def load_file(filename):
@@ -29,7 +22,7 @@ def load_file(filename):
         st.error(f"File not found at {file_path}")
         return None
     except pickle.UnpicklingError:
-        st.error(f"Error unpickling '{filename}'. The file may be corrupted.")
+        st.error(f"Error unpickling '{filename}'. The file may be corrupted or incompatible.")
         return None
     except Exception as e:
         st.error(f"Error loading '{filename}': {str(e)}")
