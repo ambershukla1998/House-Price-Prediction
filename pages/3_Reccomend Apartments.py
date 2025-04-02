@@ -3,6 +3,7 @@ import gdown
 import pickle
 import streamlit as st
 import pandas as pd
+import logging
 
 # Set the page config for Streamlit
 st.set_page_config(page_title="Interactive Apartment Recommendations")
@@ -10,12 +11,27 @@ st.set_page_config(page_title="Interactive Apartment Recommendations")
 # Define the dataset directory (relative path)
 DATASET_DIR = os.path.join(os.getcwd(), "datasets")  # Use relative path to the dataset folder
 
+# Ensure logging is enabled for detailed error tracking
+logging.basicConfig(level=logging.DEBUG)
+
+
 # Function to download files from Google Drive
 def download_from_gdrive(file_id, filename):
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
     output_path = os.path.join(DATASET_DIR, filename)
+
+    # Download the file using gdown
     gdown.download(url, output_path, quiet=False)
-    st.write(f"Successfully downloaded {filename}")
+
+    # Check the size of the downloaded file
+    file_size = os.path.getsize(output_path)
+    logging.info(f"Downloaded {filename}, Size: {file_size} bytes")
+
+    if file_size < 1024:  # Just an example, adjust as needed for your file size
+        st.error(f"Warning: {filename} seems too small. Download might have failed.")
+    else:
+        st.write(f"Successfully downloaded {filename}")
+
 
 # Example file IDs for location_distance, cosine_sim3, cosine_sim2, and cosine_sim1
 file_ids = {
@@ -30,6 +46,7 @@ for filename, file_id in file_ids.items():
     if not os.path.exists(os.path.join(DATASET_DIR, filename)):
         download_from_gdrive(file_id, filename)
 
+
 # Helper function to load pickle files
 def load_file(filename):
     file_path = os.path.join(DATASET_DIR, filename)
@@ -37,17 +54,21 @@ def load_file(filename):
         # Try to open and load the pickle file
         with open(file_path, 'rb') as file:
             data = pickle.load(file)
-            st.write(f"Successfully loaded {filename}")
+            logging.info(f"Successfully loaded {filename}")
             return data
     except FileNotFoundError:
-        st.error(f"File '{filename}' not found in {DATASET_DIR}. Please make sure the dataset is in the correct directory.")
+        logging.error(f"File '{filename}' not found in {DATASET_DIR}.")
+        st.error(f"File '{filename}' not found in {DATASET_DIR}.")
         return None
     except pickle.UnpicklingError:
+        logging.error(f"Error unpickling '{filename}'.")
         st.error(f"Error unpickling '{filename}'. The file may be corrupted or incompatible.")
         return None
     except Exception as e:
+        logging.error(f"Error loading '{filename}': {str(e)}")
         st.error(f"Error loading '{filename}': {str(e)}")
         return None
+
 
 # Load the pickle files directly from the datasets folder
 location_df = load_file("location_distance.pkl")
@@ -61,11 +82,14 @@ try:
     df1 = pd.read_csv(csv_path)
     st.write("CSV file loaded successfully!")
 except FileNotFoundError:
+    logging.error(f"CSV file not found at {csv_path}")
     st.error(f"CSV file not found at {csv_path}")
     df1 = None
 except Exception as e:
+    logging.error(f"Error loading CSV file: {str(e)}")
     st.error(f"Error loading CSV file: {str(e)}")
     df1 = None
+
 
 # Function to recommend properties with scores
 def recommend_properties_with_scores(property_name, top_n=5):
@@ -86,8 +110,10 @@ def recommend_properties_with_scores(property_name, top_n=5):
         })
         return recommendations_df
     except Exception as e:
+        logging.error(f"Error generating recommendations: {str(e)}")
         st.error(f"Error generating recommendations: {str(e)}")
         return pd.DataFrame()
+
 
 # Streamlit UI
 st.title('Interactive Apartment Recommendations')
@@ -100,7 +126,8 @@ if location_df is not None:
 
     if st.button('Search'):
         try:
-            filtered_locations = location_df[location_df[selected_location] < (radius * 1000)][selected_location].sort_values()
+            filtered_locations = location_df[location_df[selected_location] < (radius * 1000)][
+                selected_location].sort_values()
             if not filtered_locations.empty:
                 st.session_state['filtered_apartments'] = filtered_locations.index.to_list()
                 st.write(f"Locations within {radius} km from {selected_location}:")
@@ -110,6 +137,7 @@ if location_df is not None:
                 st.warning("No locations found within the specified radius.")
                 st.session_state['filtered_apartments'] = []
         except Exception as e:
+            logging.error(f"Error during location filtering: {str(e)}")
             st.error(f"Error during location filtering: {str(e)}")
 
 st.header('Apartment Recommendation')
