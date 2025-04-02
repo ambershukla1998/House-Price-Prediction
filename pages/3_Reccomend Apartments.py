@@ -7,8 +7,15 @@ import os
 
 st.set_page_config(page_title="Interactive Apartment Recommendations")
 
+# Debugging: Display the current working directory and file structure
+st.write("Current working directory:", os.getcwd())
+for root, dirs, files in os.walk("."):
+    st.write(f"Directory: {root}")
+    for file in files:
+        st.write(f" - {file}")
+
 # Define the datasets directory (relative path)
-DATASET_DIR = os.path.abspath("./datasets")
+DATASET_DIR = os.path.join(os.getcwd(), "datasets")
 
 # Helper function to load a file
 def load_file(filename):
