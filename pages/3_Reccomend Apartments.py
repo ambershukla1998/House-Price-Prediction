@@ -1,16 +1,15 @@
+import os
 import pickle
 import streamlit as st
 import pandas as pd
-import folium
-from folium.plugins import MarkerCluster
-import os
 
+# Set the page config for Streamlit
 st.set_page_config(page_title="Interactive Apartment Recommendations")
 
-# Define the datasets directory (relative path)
-DATASET_DIR = "./datasets"
+# Define the dataset directory (absolute path for troubleshooting)
+DATASET_DIR = os.path.abspath("D:/ml project/house price prediction/datasets")  # Update with your directory
 
-# Helper function to load a file
+# Helper function to load pickle files
 def load_file(filename):
     file_path = os.path.join(DATASET_DIR, filename)
     try:
@@ -64,6 +63,7 @@ def recommend_properties_with_scores(property_name, top_n=5):
         st.error(f"Error generating recommendations: {str(e)}")
         return pd.DataFrame()
 
+# Streamlit UI
 st.title('Interactive Apartment Recommendations')
 
 st.header('Select Location and Radius')
