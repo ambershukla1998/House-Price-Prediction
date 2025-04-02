@@ -94,19 +94,31 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 
 # Define a helper function to load a file
+# def load_file(filename):
+#     # Try loading from relative path
+#     try:
+#         with open(os.path.join(parent_dir, "datasets", filename), 'rb') as file:
+#             return pickle.load(file)
+#     except FileNotFoundError:
+#         # Fallback to absolute path if file is not found
+#         try:
+#             with open(f'D:/ml project/house price prediction/datasets/{filename}', 'rb') as file:
+#                 return pickle.load(file)
+#         except FileNotFoundError:
+#             print(f"The file {filename} could not be found.")
+#             return None
+
+
 def load_file(filename):
-    # Try loading from relative path
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(base_path, "datasets", filename)
     try:
-        with open(os.path.join(parent_dir, "datasets", filename), 'rb') as file:
+        with open(file_path, 'rb') as file:
             return pickle.load(file)
-    except FileNotFoundError:
-        # Fallback to absolute path if file is not found
-        try:
-            with open(f'D:/ml project/house price prediction/datasets/{filename}', 'rb') as file:
-                return pickle.load(file)
-        except FileNotFoundError:
-            print(f"The file {filename} could not be found.")
-            return None
+    except Exception as e:
+        print(f"Error loading {filename}: {e}")
+        return None
+
 
 # Load the datasets
 location_df = load_file("location_distance.pkl")
