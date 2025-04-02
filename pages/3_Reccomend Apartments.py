@@ -7,7 +7,7 @@ import pandas as pd
 # Set the page config for Streamlit
 st.set_page_config(page_title="Interactive Apartment Recommendations")
 
-# Define the dataset directory (relative path)
+# Define dataset directory (relative path)
 DATASET_DIR = os.path.join(os.getcwd(), "datasets")  # Use relative path to the dataset folder
 
 
