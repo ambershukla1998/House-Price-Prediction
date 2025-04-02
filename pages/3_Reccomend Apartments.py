@@ -4,6 +4,7 @@ import pickle
 import streamlit as st
 import pandas as pd
 import logging
+import matplotlib.pyplot as plt
 
 # Set the page config for Streamlit
 st.set_page_config(page_title="Interactive Apartment Recommendations")
@@ -39,6 +40,7 @@ file_ids = {
     "cosine_sim3.pkl": "1WKxGszmIS5-Fvl1lO2O8VyDRnkhGSmUs",  # Your actual file ID for cosine_sim3.pkl
     "cosine_sim2.pkl": "1Nd7XIGH77ELlA9OvNdXAfVr42QEoK27o",  # Your actual file ID for cosine_sim2.pkl
     "cosine_sim1.pkl": "1vUewOgl-ubKpFbWKbQi9YKp0YrgmtJcY",  # Your actual file ID for cosine_sim1.pkl
+    "data_viz1.csv": "1Qp_PvsXvQktH7JWFjalJKsOLxM0ics2X"  # Add the new file ID for data_viz1.csv
 }
 
 # Check and download files if they don't exist
@@ -76,7 +78,7 @@ cosine_sim1 = load_file("cosine_sim1.pkl")
 cosine_sim2 = load_file("cosine_sim2.pkl")
 cosine_sim3 = load_file("cosine_sim3.pkl")
 
-# Load the CSV file
+# Load the CSV file (data_viz1.csv)
 csv_path = os.path.join(DATASET_DIR, "data_viz1.csv")
 try:
     df1 = pd.read_csv(csv_path)
@@ -161,3 +163,26 @@ if st.button('Recommend'):
             st.warning("No recommendations found.")
     else:
         st.warning("Please select an apartment to get recommendations.")
+
+# Data visualization section for data_viz1.csv
+if df1 is not None:
+    st.header("Data Visualization")
+    st.write(df1.head())  # Display first few rows of data for a quick preview
+
+    # Example: Display a simple line plot for any numerical columns in df1
+    numeric_columns = df1.select_dtypes(include=['number']).columns.tolist()
+
+    if numeric_columns:
+        st.write("Numerical Data Visualization:")
+        selected_column = st.selectbox('Choose a column to visualize', numeric_columns)
+
+        if selected_column:
+            st.write(f"Visualizing data for: {selected_column}")
+            plt.figure(figsize=(10, 6))
+            plt.plot(df1[selected_column])
+            plt.title(f"Visualization of {selected_column}")
+            plt.xlabel('Index')
+            plt.ylabel(selected_column)
+            st.pyplot(plt)
+    else:
+        st.warning("No numerical columns available for visualization.")
