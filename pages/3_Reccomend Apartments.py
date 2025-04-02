@@ -8,7 +8,7 @@ import os
 st.set_page_config(page_title="Interactive Apartment Recommendations")
 
 # Define the datasets directory (relative path)
-DATASET_DIR = "datasets"
+DATASET_DIR = os.path.join(os.path.dirname(__file__), "datasets")
 
 # Print the current working directory
 st.write(f"Current working directory: {os.getcwd()}")
