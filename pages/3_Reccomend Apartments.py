@@ -1,47 +1,57 @@
 import os
 import pickle
-import requests
 import streamlit as st
+import pandas as pd
 
 # Set the page config for Streamlit
 st.set_page_config(page_title="Interactive Apartment Recommendations")
 
-# Function to load files from URLs
-def load_from_url(url):
+# Define the dataset directory (relative path)
+DATASET_DIR = os.path.join(os.getcwd(), "datasets")  # Use relative path to the dataset folder
+
+# Helper function to load pickle files
+def load_file(filename):
+    file_path = os.path.join(DATASET_DIR, filename)
     try:
-        response = requests.get(url)
-        response.raise_for_status()  # Check if the request was successful
-        data = pickle.loads(response.content)  # Load the data using pickle
-        st.write(f"Successfully loaded file from {url}")
-        return data
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error loading file from URL: {str(e)}")
+        with open(file_path, 'rb') as file:
+            data = pickle.load(file)
+            st.write(f"Successfully loaded {filename}")
+            return data
+    except FileNotFoundError:
+        st.error(f"File not found at {file_path}. Please make sure the pickle files are in the correct directory.")
+        return None
+    except pickle.UnpicklingError:
+        st.error(f"Error unpickling '{filename}'. The file may be corrupted or incompatible.")
+        return None
+    except Exception as e:
+        st.error(f"Error loading '{filename}': {str(e)}")
         return None
 
-# GitHub raw URLs for the pickle files
-location_distance_url = "https://github.com/ambershukla1998/House-Price-Prediction/raw/master/datasets/location_distance.pkl"
-cosine_sim1_url = "https://github.com/ambershukla1998/House-Price-Prediction/raw/master/datasets/cosine_sim1.pkl"
-cosine_sim2_url = "https://github.com/ambershukla1998/House-Price-Prediction/raw/master/datasets/cosine_sim2.pkl"
-cosine_sim3_url = "https://github.com/ambershukla1998/House-Price-Prediction/raw/master/datasets/cosine_sim3.pkl"
+# Load pickle files from the dataset directory
+location_df = load_file("location_distance.pkl")
+cosine_sim1 = load_file("cosine_sim1.pkl")
+cosine_sim2 = load_file("cosine_sim2.pkl")
+cosine_sim3 = load_file("cosine_sim3.pkl")
 
-# Load pickle files using the function
-location_df = load_from_url(location_distance_url)
-cosine_sim1 = load_from_url(cosine_sim1_url)
-cosine_sim2 = load_from_url(cosine_sim2_url)
-cosine_sim3 = load_from_url(cosine_sim3_url)
-
-# Load CSV file for apartment data
-csv_url = "https://github.com/ambershukla1998/House-Price-Prediction/raw/master/datasets/data_viz1.csv"
+# Load CSV file
+csv_path = os.path.join(DATASET_DIR, "data_viz1.csv")
 try:
-    df1 = pd.read_csv(csv_url)
+    df1 = pd.read_csv(csv_path)
     st.write("CSV file loaded successfully!")
+except FileNotFoundError:
+    st.error(f"CSV file not found at {csv_path}")
+    df1 = None
 except Exception as e:
-    st.error(f"Error loading CSV file from URL: {str(e)}")
+    st.error(f"Error loading CSV file: {str(e)}")
     df1 = None
 
 # Function to recommend properties with scores
 def recommend_properties_with_scores(property_name, top_n=5):
     try:
+        if location_df is None or cosine_sim1 is None or cosine_sim2 is None or cosine_sim3 is None:
+            st.error("Required data files are missing. Please ensure the pickle files are loaded correctly.")
+            return pd.DataFrame()
+
         cosine_sim_matrix = 3 * cosine_sim1 + 5 * cosine_sim2 + 6 * cosine_sim3
         sim_scores = list(enumerate(cosine_sim_matrix[location_df.index.get_loc(property_name)]))
         sorted_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
