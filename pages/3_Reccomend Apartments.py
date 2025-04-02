@@ -6,9 +6,8 @@ import pandas as pd
 # Set the page config for Streamlit
 st.set_page_config(page_title="Interactive Apartment Recommendations")
 
-# Define the dataset directory (relative path for GitHub deployment)
-# This will use the current working directory and join it with the 'datasets' folder
-DATASET_DIR = os.path.join(os.getcwd(), "datasets")
+# Define the dataset directory (relative path)
+DATASET_DIR = os.path.join(os.getcwd(), "datasets")  # Use relative path to the dataset folder
 
 # Helper function to load pickle files
 def load_file(filename):
@@ -19,7 +18,7 @@ def load_file(filename):
             st.write(f"Successfully loaded {filename}")
             return data
     except FileNotFoundError:
-        st.error(f"File not found at {file_path}. Ensure the file is present in the 'datasets' folder.")
+        st.warning(f"File not found at {file_path}. Please upload it.")
         return None
     except pickle.UnpicklingError:
         st.error(f"Error unpickling '{filename}'. The file may be corrupted or incompatible.")
@@ -28,11 +27,32 @@ def load_file(filename):
         st.error(f"Error loading '{filename}': {str(e)}")
         return None
 
-# Load datasets
+# Try loading pickle files, if not found, ask the user to upload them
 location_df = load_file("location_distance.pkl")
 cosine_sim1 = load_file("cosine_sim1.pkl")
 cosine_sim2 = load_file("cosine_sim2.pkl")
 cosine_sim3 = load_file("cosine_sim3.pkl")
+
+# If the pickle files are not found, let users upload them
+if location_df is None:
+    uploaded_file = st.file_uploader("Upload location_distance.pkl", type="pkl")
+    if uploaded_file is not None:
+        location_df = pickle.load(uploaded_file)
+
+if cosine_sim1 is None:
+    uploaded_file = st.file_uploader("Upload cosine_sim1.pkl", type="pkl")
+    if uploaded_file is not None:
+        cosine_sim1 = pickle.load(uploaded_file)
+
+if cosine_sim2 is None:
+    uploaded_file = st.file_uploader("Upload cosine_sim2.pkl", type="pkl")
+    if uploaded_file is not None:
+        cosine_sim2 = pickle.load(uploaded_file)
+
+if cosine_sim3 is None:
+    uploaded_file = st.file_uploader("Upload cosine_sim3.pkl", type="pkl")
+    if uploaded_file is not None:
+        cosine_sim3 = pickle.load(uploaded_file)
 
 # Load CSV file
 csv_path = os.path.join(DATASET_DIR, "data_viz1.csv")
@@ -40,7 +60,7 @@ try:
     df1 = pd.read_csv(csv_path)
     st.write("CSV file loaded successfully!")
 except FileNotFoundError:
-    st.error(f"CSV file not found at {csv_path}. Please check if the file is present in the 'datasets' folder.")
+    st.error(f"CSV file not found at {csv_path}")
     df1 = None
 except Exception as e:
     st.error(f"Error loading CSV file: {str(e)}")
@@ -49,7 +69,10 @@ except Exception as e:
 # Function to recommend properties with scores
 def recommend_properties_with_scores(property_name, top_n=5):
     try:
-        # Combined similarity scores
+        if location_df is None or cosine_sim1 is None or cosine_sim2 is None or cosine_sim3 is None:
+            st.error("Required data files are missing. Please upload the pickle files.")
+            return pd.DataFrame()
+
         cosine_sim_matrix = 3 * cosine_sim1 + 5 * cosine_sim2 + 6 * cosine_sim3
         sim_scores = list(enumerate(cosine_sim_matrix[location_df.index.get_loc(property_name)]))
         sorted_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
@@ -76,7 +99,6 @@ if location_df is not None:
 
     if st.button('Search'):
         try:
-            # Filter the locations based on the selected radius
             filtered_locations = location_df[location_df[selected_location] < (radius * 1000)][selected_location].sort_values()
             if not filtered_locations.empty:
                 st.session_state['filtered_apartments'] = filtered_locations.index.to_list()
