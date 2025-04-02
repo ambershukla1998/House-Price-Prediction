@@ -10,7 +10,7 @@ st.set_page_config(page_title="Interactive Apartment Recommendations")
 # Define dataset directory (relative path)
 DATASET_DIR = os.path.join(os.getcwd(), "datasets")  # Use relative path to the dataset folder
 
-# Create the datasets directory if it doesn't exist
+# Ensure dataset directory exists
 if not os.path.exists(DATASET_DIR):
     os.makedirs(DATASET_DIR)
 
@@ -45,16 +45,17 @@ file_ids = {
 # Function to check if file exists and download it if not
 def check_and_download_file(filename, file_id):
     file_path = os.path.join(DATASET_DIR, filename)
-    if not os.path.exists(file_path):
-        download_from_gdrive(file_id, filename)
+    if os.path.exists(file_path):
+        st.write(f"File {filename} already exists.")
     else:
-        st.write(f"{filename} already exists. Skipping download.")
+        st.write(f"Downloading {filename}...")
+        download_from_gdrive(file_id, filename)
 
 # Check and download files if they don't exist
 for filename, file_id in file_ids.items():
     check_and_download_file(filename, file_id)
 
-# Helper function to load pickle files
+# Helper function to load pickle files with enhanced error handling
 def load_file(filename):
     file_path = os.path.join(DATASET_DIR, filename)
     try:
@@ -73,7 +74,7 @@ def load_file(filename):
         st.error(f"Error loading '{filename}': {str(e)}")
         return None
 
-# Load the pickle files directly from the datasets folder
+# Load pickle files
 location_df = load_file("location_distance.pkl")
 cosine_sim1 = load_file("cosine_sim1.pkl")
 cosine_sim2 = load_file("cosine_sim2.pkl")
