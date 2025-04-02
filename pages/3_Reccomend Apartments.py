@@ -3,8 +3,6 @@ import gdown
 import pickle
 import streamlit as st
 import pandas as pd
-import logging
-import matplotlib.pyplot as plt
 
 # Set the page config for Streamlit
 st.set_page_config(page_title="Interactive Apartment Recommendations")
@@ -12,26 +10,25 @@ st.set_page_config(page_title="Interactive Apartment Recommendations")
 # Define the dataset directory (relative path)
 DATASET_DIR = os.path.join(os.getcwd(), "datasets")  # Use relative path to the dataset folder
 
-# Ensure logging is enabled for detailed error tracking
-logging.basicConfig(level=logging.DEBUG)
-
 
 # Function to download files from Google Drive
 def download_from_gdrive(file_id, filename):
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    output_path = os.path.join(DATASET_DIR, filename)
+    try:
+        # Construct the URL to download the file from Google Drive
+        url = f"https://drive.google.com/uc?export=download&id={file_id}"
+        output_path = os.path.join(DATASET_DIR, filename)
 
-    # Download the file using gdown
-    gdown.download(url, output_path, quiet=False)
+        # Download the file using gdown
+        gdown.download(url, output_path, quiet=False)
 
-    # Check the size of the downloaded file
-    file_size = os.path.getsize(output_path)
-    logging.info(f"Downloaded {filename}, Size: {file_size} bytes")
-
-    if file_size < 1024:  # Just an example, adjust as needed for your file size
-        st.error(f"Warning: {filename} seems too small. Download might have failed.")
-    else:
-        st.write(f"Successfully downloaded {filename}")
+        # Check if the file exists after downloading
+        if os.path.exists(output_path):
+            st.write(f"Successfully downloaded {filename}")
+        else:
+            st.error(f"Failed to download {filename}. The file was not saved correctly.")
+    except Exception as e:
+        st.error(f"Error downloading {filename}: {str(e)}")
+        print(f"Error downloading {filename}: {str(e)}")
 
 
 # Example file IDs for location_distance, cosine_sim3, cosine_sim2, and cosine_sim1
@@ -40,7 +37,6 @@ file_ids = {
     "cosine_sim3.pkl": "1WKxGszmIS5-Fvl1lO2O8VyDRnkhGSmUs",  # Your actual file ID for cosine_sim3.pkl
     "cosine_sim2.pkl": "1Nd7XIGH77ELlA9OvNdXAfVr42QEoK27o",  # Your actual file ID for cosine_sim2.pkl
     "cosine_sim1.pkl": "1vUewOgl-ubKpFbWKbQi9YKp0YrgmtJcY",  # Your actual file ID for cosine_sim1.pkl
-    "data_viz1.csv": "1Qp_PvsXvQktH7JWFjalJKsOLxM0ics2X"  # Add the new file ID for data_viz1.csv
 }
 
 # Check and download files if they don't exist
@@ -56,18 +52,16 @@ def load_file(filename):
         # Try to open and load the pickle file
         with open(file_path, 'rb') as file:
             data = pickle.load(file)
-            logging.info(f"Successfully loaded {filename}")
+            st.write(f"Successfully loaded {filename}")
             return data
     except FileNotFoundError:
-        logging.error(f"File '{filename}' not found in {DATASET_DIR}.")
-        st.error(f"File '{filename}' not found in {DATASET_DIR}.")
+        st.error(
+            f"File '{filename}' not found in {DATASET_DIR}. Please make sure the dataset is in the correct directory.")
         return None
     except pickle.UnpicklingError:
-        logging.error(f"Error unpickling '{filename}'.")
         st.error(f"Error unpickling '{filename}'. The file may be corrupted or incompatible.")
         return None
     except Exception as e:
-        logging.error(f"Error loading '{filename}': {str(e)}")
         st.error(f"Error loading '{filename}': {str(e)}")
         return None
 
@@ -78,17 +72,15 @@ cosine_sim1 = load_file("cosine_sim1.pkl")
 cosine_sim2 = load_file("cosine_sim2.pkl")
 cosine_sim3 = load_file("cosine_sim3.pkl")
 
-# Load the CSV file (data_viz1.csv)
+# Load the CSV file
 csv_path = os.path.join(DATASET_DIR, "data_viz1.csv")
 try:
     df1 = pd.read_csv(csv_path)
     st.write("CSV file loaded successfully!")
 except FileNotFoundError:
-    logging.error(f"CSV file not found at {csv_path}")
     st.error(f"CSV file not found at {csv_path}")
     df1 = None
 except Exception as e:
-    logging.error(f"Error loading CSV file: {str(e)}")
     st.error(f"Error loading CSV file: {str(e)}")
     df1 = None
 
@@ -112,7 +104,6 @@ def recommend_properties_with_scores(property_name, top_n=5):
         })
         return recommendations_df
     except Exception as e:
-        logging.error(f"Error generating recommendations: {str(e)}")
         st.error(f"Error generating recommendations: {str(e)}")
         return pd.DataFrame()
 
@@ -139,7 +130,6 @@ if location_df is not None:
                 st.warning("No locations found within the specified radius.")
                 st.session_state['filtered_apartments'] = []
         except Exception as e:
-            logging.error(f"Error during location filtering: {str(e)}")
             st.error(f"Error during location filtering: {str(e)}")
 
 st.header('Apartment Recommendation')
@@ -163,26 +153,3 @@ if st.button('Recommend'):
             st.warning("No recommendations found.")
     else:
         st.warning("Please select an apartment to get recommendations.")
-
-# Data visualization section for data_viz1.csv
-if df1 is not None:
-    st.header("Data Visualization")
-    st.write(df1.head())  # Display first few rows of data for a quick preview
-
-    # Example: Display a simple line plot for any numerical columns in df1
-    numeric_columns = df1.select_dtypes(include=['number']).columns.tolist()
-
-    if numeric_columns:
-        st.write("Numerical Data Visualization:")
-        selected_column = st.selectbox('Choose a column to visualize', numeric_columns)
-
-        if selected_column:
-            st.write(f"Visualizing data for: {selected_column}")
-            plt.figure(figsize=(10, 6))
-            plt.plot(df1[selected_column])
-            plt.title(f"Visualization of {selected_column}")
-            plt.xlabel('Index')
-            plt.ylabel(selected_column)
-            st.pyplot(plt)
-    else:
-        st.warning("No numerical columns available for visualization.")
