@@ -1,78 +1,47 @@
 import os
 import pickle
+import requests
 import streamlit as st
-import pandas as pd
 
 # Set the page config for Streamlit
 st.set_page_config(page_title="Interactive Apartment Recommendations")
 
-# Define the dataset directory (relative path)
-DATASET_DIR = os.path.join(os.getcwd(), "datasets")  # Use relative path to the dataset folder
-
-# Helper function to load pickle files
-def load_file(filename):
-    file_path = os.path.join(DATASET_DIR, filename)
+# Function to load files from URLs
+def load_from_url(url):
     try:
-        with open(file_path, 'rb') as file:
-            data = pickle.load(file)
-            st.write(f"Successfully loaded {filename}")
-            return data
-    except FileNotFoundError:
-        st.warning(f"File not found at {file_path}. Please upload it.")
-        return None
-    except pickle.UnpicklingError:
-        st.error(f"Error unpickling '{filename}'. The file may be corrupted or incompatible.")
-        return None
-    except Exception as e:
-        st.error(f"Error loading '{filename}': {str(e)}")
+        response = requests.get(url)
+        response.raise_for_status()  # Check if the request was successful
+        data = pickle.loads(response.content)  # Load the data using pickle
+        st.write(f"Successfully loaded file from {url}")
+        return data
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error loading file from URL: {str(e)}")
         return None
 
-# Try loading pickle files, if not found, ask the user to upload them
-location_df = load_file("location_distance.pkl")
-cosine_sim1 = load_file("cosine_sim1.pkl")
-cosine_sim2 = load_file("cosine_sim2.pkl")
-cosine_sim3 = load_file("cosine_sim3.pkl")
+# GitHub raw URLs for the pickle files
+location_distance_url = "https://github.com/ambershukla1998/House-Price-Prediction/raw/master/datasets/location_distance.pkl"
+cosine_sim1_url = "https://github.com/ambershukla1998/House-Price-Prediction/raw/master/datasets/cosine_sim1.pkl"
+cosine_sim2_url = "https://github.com/ambershukla1998/House-Price-Prediction/raw/master/datasets/cosine_sim2.pkl"
+cosine_sim3_url = "https://github.com/ambershukla1998/House-Price-Prediction/raw/master/datasets/cosine_sim3.pkl"
 
-# If the pickle files are not found, let users upload them
-if location_df is None:
-    uploaded_file = st.file_uploader("Upload location_distance.pkl", type="pkl")
-    if uploaded_file is not None:
-        location_df = pickle.load(uploaded_file)
+# Load pickle files using the function
+location_df = load_from_url(location_distance_url)
+cosine_sim1 = load_from_url(cosine_sim1_url)
+cosine_sim2 = load_from_url(cosine_sim2_url)
+cosine_sim3 = load_from_url(cosine_sim3_url)
 
-if cosine_sim1 is None:
-    uploaded_file = st.file_uploader("Upload cosine_sim1.pkl", type="pkl")
-    if uploaded_file is not None:
-        cosine_sim1 = pickle.load(uploaded_file)
-
-if cosine_sim2 is None:
-    uploaded_file = st.file_uploader("Upload cosine_sim2.pkl", type="pkl")
-    if uploaded_file is not None:
-        cosine_sim2 = pickle.load(uploaded_file)
-
-if cosine_sim3 is None:
-    uploaded_file = st.file_uploader("Upload cosine_sim3.pkl", type="pkl")
-    if uploaded_file is not None:
-        cosine_sim3 = pickle.load(uploaded_file)
-
-# Load CSV file
-csv_path = os.path.join(DATASET_DIR, "data_viz1.csv")
+# Load CSV file for apartment data
+csv_url = "https://github.com/ambershukla1998/House-Price-Prediction/raw/master/datasets/data_viz1.csv"
 try:
-    df1 = pd.read_csv(csv_path)
+    df1 = pd.read_csv(csv_url)
     st.write("CSV file loaded successfully!")
-except FileNotFoundError:
-    st.error(f"CSV file not found at {csv_path}")
-    df1 = None
 except Exception as e:
-    st.error(f"Error loading CSV file: {str(e)}")
+    st.error(f"Error loading CSV file from URL: {str(e)}")
     df1 = None
 
 # Function to recommend properties with scores
 def recommend_properties_with_scores(property_name, top_n=5):
     try:
-        if location_df is None or cosine_sim1 is None or cosine_sim2 is None or cosine_sim3 is None:
-            st.error("Required data files are missing. Please upload the pickle files.")
-            return pd.DataFrame()
-
         cosine_sim_matrix = 3 * cosine_sim1 + 5 * cosine_sim2 + 6 * cosine_sim3
         sim_scores = list(enumerate(cosine_sim_matrix[location_df.index.get_loc(property_name)]))
         sorted_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
