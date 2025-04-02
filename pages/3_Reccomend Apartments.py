@@ -1,4 +1,5 @@
 import os
+import gdown
 import pickle
 import streamlit as st
 import pandas as pd
@@ -8,6 +9,26 @@ st.set_page_config(page_title="Interactive Apartment Recommendations")
 
 # Define the dataset directory (relative path)
 DATASET_DIR = os.path.join(os.getcwd(), "datasets")  # Use relative path to the dataset folder
+
+# Function to download files from Google Drive
+def download_from_gdrive(file_id, filename):
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    output_path = os.path.join(DATASET_DIR, filename)
+    gdown.download(url, output_path, quiet=False)
+    st.write(f"Successfully downloaded {filename}")
+
+# Example file IDs for location_distance, cosine_sim3, cosine_sim2, and cosine_sim1
+file_ids = {
+    "location_distance.pkl": "1HTrAJHhi_ZVFYQtxq_8fbV-EbiC73WUz",  # Your actual file ID for location_distance.pkl
+    "cosine_sim3.pkl": "1WKxGszmIS5-Fvl1lO2O8VyDRnkhGSmUs",  # Your actual file ID for cosine_sim3.pkl
+    "cosine_sim2.pkl": "1Nd7XIGH77ELlA9OvNdXAfVr42QEoK27o",  # Your actual file ID for cosine_sim2.pkl
+    "cosine_sim1.pkl": "1vUewOgl-ubKpFbWKbQi9YKp0YrgmtJcY",  # Your actual file ID for cosine_sim1.pkl
+}
+
+# Check and download files if they don't exist
+for filename, file_id in file_ids.items():
+    if not os.path.exists(os.path.join(DATASET_DIR, filename)):
+        download_from_gdrive(file_id, filename)
 
 # Helper function to load pickle files
 def load_file(filename):
