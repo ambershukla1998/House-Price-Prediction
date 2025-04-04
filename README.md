@@ -1,4 +1,4 @@
-# Real Estate Project - CampusX
+# GHARDEKHO
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/arv-anshul/campusx-real-estate/main/assets/house_with_garden.png" height="100px">
