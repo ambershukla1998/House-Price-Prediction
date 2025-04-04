@@ -41,7 +41,7 @@ pip install -r requirements.txt
 3. Run the streamlit app.
 
 ```sh
-streamlit run Real_Estate_Project.py
+streamlit run Home.py
 ```
 
 ## Acknowledgements
