@@ -1,7 +1,7 @@
 # GHARDEKHO
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/arv-anshul/campusx-real-estate/main/assets/house_with_garden.png" height="100px">
+<img src="https://github.com/ambershukla1998/House-Price-Prediction/blob/master/assets/house.png" height="100px">
 <img src="https://raw.githubusercontent.com/arv-anshul/campusx-real-estate/main/assets/house_buildings.png" height="100px">
 <img src="https://raw.githubusercontent.com/arv-anshul/campusx-real-estate/main/assets/house.png" height="100px">
 </p>
