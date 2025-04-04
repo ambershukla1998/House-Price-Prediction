@@ -153,53 +153,210 @@
 #         st.warning("Please select an apartment to get recommendations.")
 
 
+# import os
+# import gdown
+# import pickle
+# import streamlit as st
+# import pandas as pd
+#
+# # Set the page config for Streamlit
+# st.set_page_config(page_title="Interactive Apartment Recommendations")
+#
+# # Define dataset directory (relative path)
+# DATASET_DIR = os.path.join(os.getcwd(), "datasets")
+# os.makedirs(DATASET_DIR, exist_ok=True)  # Ensure the directory exists
+#
+# # Optional file inspection (first few bytes)
+# def inspect_file(filename):
+#     path = os.path.join(DATASET_DIR, filename)
+#     try:
+#         with open(path, 'rb') as f:
+#             content = f.read(100)
+#             print(f"First 100 bytes of {filename}: {content[:100]}")
+#     except Exception as e:
+#         print(f"Could not inspect file {filename}: {str(e)}")
+#
+# # Optional MIME-type checker using `python-magic`
+# # def check_file_type(path):
+# #     import magic
+# #     mime = magic.from_file(path, mime=True)
+# #     print(f"File type of {path}: {mime}")
+#
+# # Function to download files from Google Drive
+# def download_from_gdrive(file_id, filename):
+#     try:
+#         url = f"https://drive.google.com/uc?id={file_id}"
+#         output_path = os.path.join(DATASET_DIR, filename)
+#
+#         gdown.download(url, output_path, quiet=False, fuzzy=True)
+#
+#         if os.path.exists(output_path):
+#             st.write(f"✅ Successfully downloaded {filename}")
+#             inspect_file(filename)  # Inspect the first few bytes
+#             # check_file_type(output_path)  # Optional: check MIME type
+#         else:
+#             st.error(f"❌ Failed to save {filename}.")
+#     except Exception as e:
+#         st.error(f"🚨 Error downloading {filename}: {str(e)}")
+#
+# # File IDs for Google Drive downloads
+# file_ids = {
+#     "location_distance.pkl": "1HTrAJHhi_ZVFYQtxq_8fbV-EbiC73WUz",
+#     "cosine_sim3.pkl": "1WKxGszmIS5-Fvl1lO2O8VyDRnkhGSmUs",
+#     "cosine_sim2.pkl": "1Nd7XIGH77ELlA9OvNdXAfVr42QEoK27o",
+#     "cosine_sim1.pkl": "1vUewOgl-ubKpFbWKbQi9YKp0YrgmtJcY",
+# }
+#
+# # Download missing files
+# for filename, file_id in file_ids.items():
+#     if not os.path.exists(os.path.join(DATASET_DIR, filename)):
+#         download_from_gdrive(file_id, filename)
+#
+# # Load pickle file
+# def load_file(filename):
+#     file_path = os.path.join(DATASET_DIR, filename)
+#     try:
+#         with open(file_path, 'rb') as file:
+#             data = pickle.load(file)
+#             return data
+#     except FileNotFoundError:
+#         st.error(f"❌ File '{filename}' not found in {DATASET_DIR}.")
+#         return None
+#     except pickle.UnpicklingError:
+#         st.error(f"⚠️ Unpickling error: '{filename}' may be corrupted or invalid.")
+#         return None
+#     except Exception as e:
+#         st.error(f"🚨 Error loading '{filename}': {str(e)}")
+#         return None
+#
+# # Load datasets
+# location_df = load_file("location_distance.pkl")
+# cosine_sim1 = load_file("cosine_sim1.pkl")
+# cosine_sim2 = load_file("cosine_sim2.pkl")
+# cosine_sim3 = load_file("cosine_sim3.pkl")
+#
+# # Load CSV file
+# csv_path = os.path.join(DATASET_DIR, "data_viz1.csv")
+# try:
+#     df1 = pd.read_csv(csv_path)
+# except FileNotFoundError:
+#     st.error(f"❌ CSV file not found at {csv_path}")
+#     df1 = None
+# except Exception as e:
+#     st.error(f"🚨 Error loading CSV: {str(e)}")
+#     df1 = None
+#
+# # Recommend properties function
+# def recommend_properties_with_scores(property_name, top_n=5):
+#     try:
+#         if location_df is None or cosine_sim1 is None or cosine_sim2 is None or cosine_sim3 is None:
+#             st.error("❌ Required data files are missing.")
+#             return pd.DataFrame()
+#
+#         cosine_sim_matrix = 3 * cosine_sim1 + 5 * cosine_sim2 + 6 * cosine_sim3
+#         sim_scores = list(enumerate(cosine_sim_matrix[location_df.index.get_loc(property_name)]))
+#         sorted_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+#         top_indices = [i[0] for i in sorted_scores[1:top_n + 1]]
+#         top_scores = [i[1] for i in sorted_scores[1:top_n + 1]]
+#         top_properties = location_df.index[top_indices].tolist()
+#
+#         return pd.DataFrame({
+#             'PropertyName': top_properties,
+#             'SimilarityScore': top_scores
+#         })
+#     except Exception as e:
+#         st.error(f"🚨 Error generating recommendations: {str(e)}")
+#         return pd.DataFrame()
+#
+# # Streamlit UI
+# st.title('🏢 Interactive Apartment Recommendations')
+#
+# st.header('📍 Select Location and Radius')
+# if location_df is not None:
+#     location_options = sorted(location_df.columns.to_list())
+#     selected_location = st.selectbox('Location', location_options)
+#     radius = st.number_input('Radius in Kms', min_value=0.1, value=5.0, step=0.1)
+#
+#     if st.button('🔍 Search'):
+#         try:
+#             filtered_locations = location_df[location_df[selected_location] < (radius * 1000)][
+#                 selected_location].sort_values()
+#             if not filtered_locations.empty:
+#                 st.session_state['filtered_apartments'] = filtered_locations.index.to_list()
+#                 st.write(f"Properties within {radius} km from {selected_location}:")
+#                 for key, value in filtered_locations.items():
+#                     st.text(f"{key}: {round(value / 1000, 2)} km")
+#             else:
+#                 st.warning("⚠️ No properties found within that radius.")
+#                 st.session_state['filtered_apartments'] = []
+#         except Exception as e:
+#             st.error(f"🚨 Error filtering locations: {str(e)}")
+#
+# st.header('🏘️ Apartment Recommendation')
+# if 'filtered_apartments' not in st.session_state:
+#     st.session_state['filtered_apartments'] = []
+#
+# apartment_options = (
+#     st.session_state['filtered_apartments']
+#     if st.session_state['filtered_apartments']
+#     else location_df.index.to_list() if location_df is not None else []
+# )
+#
+# selected_apartment = st.selectbox('Select an apartment', apartment_options)
+#
+# if st.button('🎯 Recommend'):
+#     if selected_apartment:
+#         recommendation_df = recommend_properties_with_scores(selected_apartment)
+#         if not recommendation_df.empty:
+#             st.write("📌 Recommended Apartments:")
+#             st.dataframe(recommendation_df)
+#         else:
+#             st.warning("⚠️ No recommendations found.")
+#     else:
+#         st.warning("⚠️ Please select an apartment to get recommendations.")
+#
+
 import os
 import gdown
 import pickle
 import streamlit as st
 import pandas as pd
 
-# Set the page config for Streamlit
+# Set Streamlit page config
 st.set_page_config(page_title="Interactive Apartment Recommendations")
 
-# Define dataset directory (relative path)
+# Dataset directory
 DATASET_DIR = os.path.join(os.getcwd(), "datasets")
-os.makedirs(DATASET_DIR, exist_ok=True)  # Ensure the directory exists
+os.makedirs(DATASET_DIR, exist_ok=True)
 
-# Optional file inspection (first few bytes)
+# Function to inspect file content (first 100 bytes)
 def inspect_file(filename):
-    path = os.path.join(DATASET_DIR, filename)
     try:
-        with open(path, 'rb') as f:
-            content = f.read(100)
-            print(f"First 100 bytes of {filename}: {content[:100]}")
+        with open(os.path.join(DATASET_DIR, filename), 'rb') as f:
+            start = f.read(100)
+            if b'<html' in start.lower():
+                st.warning(f"⚠️ File '{filename}' might be an HTML page, not a pickle.")
+            return start
     except Exception as e:
-        print(f"Could not inspect file {filename}: {str(e)}")
+        st.error(f"Failed to inspect {filename}: {e}")
 
-# Optional MIME-type checker using `python-magic`
-# def check_file_type(path):
-#     import magic
-#     mime = magic.from_file(path, mime=True)
-#     print(f"File type of {path}: {mime}")
-
-# Function to download files from Google Drive
+# Download files from Google Drive
 def download_from_gdrive(file_id, filename):
     try:
-        url = f"https://drive.google.com/uc?id={file_id}"
+        url = f"https://drive.google.com/uc?export=download&id={file_id}"
         output_path = os.path.join(DATASET_DIR, filename)
-
         gdown.download(url, output_path, quiet=False, fuzzy=True)
 
+        # Inspect file after download
         if os.path.exists(output_path):
-            st.write(f"✅ Successfully downloaded {filename}")
-            inspect_file(filename)  # Inspect the first few bytes
-            # check_file_type(output_path)  # Optional: check MIME type
+            st.write(f"✅ Downloaded {filename}")
+            inspect_file(filename)
         else:
-            st.error(f"❌ Failed to save {filename}.")
+            st.error(f"❌ Download failed for {filename}")
     except Exception as e:
-        st.error(f"🚨 Error downloading {filename}: {str(e)}")
+        st.error(f"Error downloading {filename}: {str(e)}")
 
-# File IDs for Google Drive downloads
+# File IDs
 file_ids = {
     "location_distance.pkl": "1HTrAJHhi_ZVFYQtxq_8fbV-EbiC73WUz",
     "cosine_sim3.pkl": "1WKxGszmIS5-Fvl1lO2O8VyDRnkhGSmUs",
@@ -207,50 +364,46 @@ file_ids = {
     "cosine_sim1.pkl": "1vUewOgl-ubKpFbWKbQi9YKp0YrgmtJcY",
 }
 
-# Download missing files
+# Download if missing
 for filename, file_id in file_ids.items():
     if not os.path.exists(os.path.join(DATASET_DIR, filename)):
         download_from_gdrive(file_id, filename)
 
-# Load pickle file
+# Load pickle files with validation
 def load_file(filename):
     file_path = os.path.join(DATASET_DIR, filename)
     try:
         with open(file_path, 'rb') as file:
-            data = pickle.load(file)
-            return data
-    except FileNotFoundError:
-        st.error(f"❌ File '{filename}' not found in {DATASET_DIR}.")
-        return None
+            return pickle.load(file)
     except pickle.UnpicklingError:
-        st.error(f"⚠️ Unpickling error: '{filename}' may be corrupted or invalid.")
+        st.warning(f"⚠️ Unpickling error: '{filename}' may be corrupted or invalid.")
         return None
     except Exception as e:
-        st.error(f"🚨 Error loading '{filename}': {str(e)}")
+        st.error(f"Error loading '{filename}': {str(e)}")
         return None
 
-# Load datasets
+# Load files
 location_df = load_file("location_distance.pkl")
 cosine_sim1 = load_file("cosine_sim1.pkl")
 cosine_sim2 = load_file("cosine_sim2.pkl")
 cosine_sim3 = load_file("cosine_sim3.pkl")
 
-# Load CSV file
+# Load CSV
 csv_path = os.path.join(DATASET_DIR, "data_viz1.csv")
 try:
     df1 = pd.read_csv(csv_path)
 except FileNotFoundError:
-    st.error(f"❌ CSV file not found at {csv_path}")
+    st.error(f"CSV not found at {csv_path}")
     df1 = None
 except Exception as e:
-    st.error(f"🚨 Error loading CSV: {str(e)}")
+    st.error(f"CSV load error: {e}")
     df1 = None
 
-# Recommend properties function
+# Recommendation function
 def recommend_properties_with_scores(property_name, top_n=5):
     try:
         if location_df is None or cosine_sim1 is None or cosine_sim2 is None or cosine_sim3 is None:
-            st.error("❌ Required data files are missing.")
+            st.error("Missing required data files.")
             return pd.DataFrame()
 
         cosine_sim_matrix = 3 * cosine_sim1 + 5 * cosine_sim2 + 6 * cosine_sim3
@@ -259,59 +412,48 @@ def recommend_properties_with_scores(property_name, top_n=5):
         top_indices = [i[0] for i in sorted_scores[1:top_n + 1]]
         top_scores = [i[1] for i in sorted_scores[1:top_n + 1]]
         top_properties = location_df.index[top_indices].tolist()
-
-        return pd.DataFrame({
-            'PropertyName': top_properties,
-            'SimilarityScore': top_scores
-        })
+        return pd.DataFrame({'PropertyName': top_properties, 'SimilarityScore': top_scores})
     except Exception as e:
-        st.error(f"🚨 Error generating recommendations: {str(e)}")
+        st.error(f"Error in recommendation: {e}")
         return pd.DataFrame()
 
 # Streamlit UI
-st.title('🏢 Interactive Apartment Recommendations')
+st.title('🏙️ Apartment Recommendation App')
 
-st.header('📍 Select Location and Radius')
+st.header('📍 Location Search')
 if location_df is not None:
     location_options = sorted(location_df.columns.to_list())
-    selected_location = st.selectbox('Location', location_options)
-    radius = st.number_input('Radius in Kms', min_value=0.1, value=5.0, step=0.1)
+    selected_location = st.selectbox('Choose a location', location_options)
+    radius = st.number_input('Radius (km)', min_value=0.1, value=5.0, step=0.1)
 
-    if st.button('🔍 Search'):
+    if st.button('🔍 Search Nearby'):
         try:
             filtered_locations = location_df[location_df[selected_location] < (radius * 1000)][
                 selected_location].sort_values()
             if not filtered_locations.empty:
                 st.session_state['filtered_apartments'] = filtered_locations.index.to_list()
-                st.write(f"Properties within {radius} km from {selected_location}:")
+                st.success(f"Found {len(filtered_locations)} within {radius} km of {selected_location}.")
                 for key, value in filtered_locations.items():
                     st.text(f"{key}: {round(value / 1000, 2)} km")
             else:
-                st.warning("⚠️ No properties found within that radius.")
+                st.warning("No apartments found in range.")
                 st.session_state['filtered_apartments'] = []
         except Exception as e:
-            st.error(f"🚨 Error filtering locations: {str(e)}")
+            st.error(f"Error filtering: {e}")
 
-st.header('🏘️ Apartment Recommendation')
+st.header('🏡 Apartment Recommendations')
 if 'filtered_apartments' not in st.session_state:
     st.session_state['filtered_apartments'] = []
 
-apartment_options = (
-    st.session_state['filtered_apartments']
-    if st.session_state['filtered_apartments']
-    else location_df.index.to_list() if location_df is not None else []
-)
+apartment_options = st.session_state['filtered_apartments'] or (location_df.index.to_list() if location_df is not None else [])
+selected_apartment = st.selectbox('Choose an apartment', apartment_options)
 
-selected_apartment = st.selectbox('Select an apartment', apartment_options)
-
-if st.button('🎯 Recommend'):
+if st.button('📌 Recommend'):
     if selected_apartment:
-        recommendation_df = recommend_properties_with_scores(selected_apartment)
-        if not recommendation_df.empty:
-            st.write("📌 Recommended Apartments:")
-            st.dataframe(recommendation_df)
+        result_df = recommend_properties_with_scores(selected_apartment)
+        if not result_df.empty:
+            st.dataframe(result_df)
         else:
-            st.warning("⚠️ No recommendations found.")
+            st.warning("No recommendations found.")
     else:
-        st.warning("⚠️ Please select an apartment to get recommendations.")
-
+        st.warning("Please select an apartment first.")
