@@ -1,9 +1,9 @@
-# Real Estate Project - CampusX
+# GHARDEKHO
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/arv-anshul/campusx-real-estate/main/assets/house_with_garden.png" height="100px">
-<img src="https://raw.githubusercontent.com/arv-anshul/campusx-real-estate/main/assets/house_buildings.png" height="100px">
-<img src="https://raw.githubusercontent.com/arv-anshul/campusx-real-estate/main/assets/house.png" height="100px">
+<img src="https://github.com/ambershukla1998/House-Price-Prediction/blob/master/assets/house_with_garden.png" height="100px">
+<img src="https://github.com/ambershukla1998/House-Price-Prediction/blob/master/assets/house_buildings.png" height="100px">
+<img src="https://github.com/ambershukla1998/House-Price-Prediction/blob/master/assets/house.png" height="100px">
 </p>
 
 > [!IMPORTANT]
@@ -41,14 +41,12 @@ pip install -r requirements.txt
 3. Run the streamlit app.
 
 ```sh
-streamlit run Real_Estate_Project.py
+streamlit run Home.py
 ```
 
 ## Acknowledgements
 
 - [99acres.com](https://99acres.com/): I used this website to gather the data for this project.
-- [@arv-anshul/99acres-scrape](https://github.com/arv-anshul/99acres-scrape): Used this Streamlit web-app to scrape data from 99acres.com website.
-- [CampusX DSMP](https://learnwith.campusx.com): I take inspirations and follow this course's **Capstone Project**.
 
 ## License
 
