@@ -176,41 +176,36 @@ def inspect_file(filename):
     except Exception as e:
         print(f"Could not inspect file {filename}: {str(e)}")
 
-# Optional MIME-type checker using `python-magic`
-# def check_file_type(path):
-#     import magic
-#     mime = magic.from_file(path, mime=True)
-#     print(f"File type of {path}: {mime}")
 
-# Function to download files from Google Drive
-def download_from_gdrive(file_id, filename):
-    try:
-        url = f"https://drive.google.com/uc?id={file_id}"
-        output_path = os.path.join(DATASET_DIR, filename)
-
-        gdown.download(url, output_path, quiet=False, fuzzy=True)
-
-        if os.path.exists(output_path):
-            st.write(f"✅ Successfully downloaded {filename}")
-            inspect_file(filename)  # Inspect the first few bytes
-            # check_file_type(output_path)  # Optional: check MIME type
-        else:
-            st.error(f"❌ Failed to save {filename}.")
-    except Exception as e:
-        st.error(f"🚨 Error downloading {filename}: {str(e)}")
-
-# File IDs for Google Drive downloads
-file_ids = {
-    "location_distance.pkl": "1HTrAJHhi_ZVFYQtxq_8fbV-EbiC73WUz",
-    "cosine_sim3.pkl": "1WKxGszmIS5-Fvl1lO2O8VyDRnkhGSmUs",
-    "cosine_sim2.pkl": "1Nd7XIGH77ELlA9OvNdXAfVr42QEoK27o",
-    "cosine_sim1.pkl": "1vUewOgl-ubKpFbWKbQi9YKp0YrgmtJcY",
-}
-
-# Download missing files
-for filename, file_id in file_ids.items():
-    if not os.path.exists(os.path.join(DATASET_DIR, filename)):
-        download_from_gdrive(file_id, filename)
+# # Function to download files from Google Drive
+# def download_from_gdrive(file_id, filename):
+#     try:
+#         url = f"https://drive.google.com/uc?id={file_id}"
+#         output_path = os.path.join(DATASET_DIR, filename)
+#
+#         gdown.download(url, output_path, quiet=False, fuzzy=True)
+#
+#         if os.path.exists(output_path):
+#             st.write(f"✅ Successfully downloaded {filename}")
+#             inspect_file(filename)  # Inspect the first few bytes
+#             # check_file_type(output_path)  # Optional: check MIME type
+#         else:
+#             st.error(f"❌ Failed to save {filename}.")
+#     except Exception as e:
+#         st.error(f"🚨 Error downloading {filename}: {str(e)}")
+#
+# # File IDs for Google Drive downloads
+# file_ids = {
+#     "location_distance.pkl": "1HTrAJHhi_ZVFYQtxq_8fbV-EbiC73WUz",
+#     "cosine_sim3.pkl": "1WKxGszmIS5-Fvl1lO2O8VyDRnkhGSmUs",
+#     "cosine_sim2.pkl": "1Nd7XIGH77ELlA9OvNdXAfVr42QEoK27o",
+#     "cosine_sim1.pkl": "1vUewOgl-ubKpFbWKbQi9YKp0YrgmtJcY",
+# }
+#
+# # Download missing files
+# for filename, file_id in file_ids.items():
+#     if not os.path.exists(os.path.join(DATASET_DIR, filename)):
+#         download_from_gdrive(file_id, filename)
 
 # Load pickle file
 def load_file(filename):
@@ -314,5 +309,8 @@ if st.button('🎯 Recommend'):
             st.warning("⚠️ No recommendations found.")
     else:
         st.warning("⚠️ Please select an apartment to get recommendations.")
+
+
+
 
 
