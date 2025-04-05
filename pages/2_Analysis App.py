@@ -293,13 +293,23 @@ import pickle
 from pathlib import Path
 import streamlit as st
 
+import pandas as pd
+import pickle
+from pathlib import Path
+import streamlit as st
+
 @st.cache_data
 def load_data():
     try:
-        # Go to project root and find datasets/
         data_dir = Path(__file__).resolve().parent.parent / "datasets"
 
-        with open(data_dir / "feature_text.pkl", "rb") as f:
+        # 🔍 Print to confirm
+        st.write("📂 Loading from:", data_dir)
+
+        feature_path = data_dir / "feature_text.pkl"
+        st.write("🔑 Trying to load:", feature_path)
+
+        with open(feature_path, "rb") as f:
             feature_text = pickle.load(f)
 
         new_df = pd.read_csv(data_dir / "data_viz1.csv")
@@ -310,6 +320,7 @@ def load_data():
     except Exception as e:
         st.error(f"❌ Error loading data: {e}")
         return None, None, None
+
 
 feature_text, new_df, wordcloud_df = load_data()
 if new_df is None:
