@@ -288,13 +288,10 @@ st.title("📊 House Price Analytics Dashboard")
 # --- Load Data Section ---
 
 
-import pandas as pd
 import pickle
-from pathlib import Path
-import streamlit as st
 
 import pandas as pd
-import pickle
+import joblib
 from pathlib import Path
 import streamlit as st
 
@@ -303,14 +300,11 @@ def load_data():
     try:
         data_dir = Path(__file__).resolve().parent.parent / "datasets"
 
-        # 🔍 Print to confirm
         st.write("📂 Loading from:", data_dir)
+        st.write("🔑 Trying to load:", data_dir / "feature_text.pkl")
 
-        feature_path = data_dir / "feature_text.pkl"
-        st.write("🔑 Trying to load:", feature_path)
-
-        with open(feature_path, "rb") as f:
-            feature_text = pickle.load(f)
+        # ✅ Use joblib instead of pickle
+        feature_text = joblib.load(data_dir / "feature_text.pkl")
 
         new_df = pd.read_csv(data_dir / "data_viz1.csv")
         wordcloud_df = pd.read_csv(data_dir / "wordcloud.csv")
@@ -320,6 +314,7 @@ def load_data():
     except Exception as e:
         st.error(f"❌ Error loading data: {e}")
         return None, None, None
+
 
 
 feature_text, new_df, wordcloud_df = load_data()
