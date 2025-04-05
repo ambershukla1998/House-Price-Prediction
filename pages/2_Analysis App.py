@@ -288,20 +288,28 @@ st.title("📊 House Price Analytics Dashboard")
 # --- Load Data Section ---
 
 
+import pandas as pd
+import pickle
+from pathlib import Path
+import streamlit as st
+
 @st.cache_data
 def load_data():
     try:
-        with open("datasets/feature_text.pkl", "rb") as f:
+        # Go to project root and find datasets/
+        data_dir = Path(__file__).resolve().parent.parent / "datasets"
+
+        with open(data_dir / "feature_text.pkl", "rb") as f:
             feature_text = pickle.load(f)
 
-        new_df = pd.read_csv("datasets/data_viz1.csv")
-        wordcloud_df = pd.read_csv("datasets/wordcloud.csv")
+        new_df = pd.read_csv(data_dir / "data_viz1.csv")
+        wordcloud_df = pd.read_csv(data_dir / "wordcloud.csv")
 
         return feature_text, new_df, wordcloud_df
+
     except Exception as e:
         st.error(f"❌ Error loading data: {e}")
         return None, None, None
-
 
 feature_text, new_df, wordcloud_df = load_data()
 if new_df is None:
