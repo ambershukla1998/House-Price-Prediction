@@ -286,16 +286,22 @@ st.set_page_config(page_title="🏡 House Price Insights", layout="wide")
 st.title("📊 House Price Analytics Dashboard")
 
 # --- Load Data Section ---
+
+
 @st.cache_data
 def load_data():
     try:
-        feature_text = pickle.load(open(r"D:\ml project\house price prediction\datasets\feature_text.pkl", 'rb'))
-        new_df = pd.read_csv(r"D:\ml project\house price prediction\datasets\data_viz1.csv")
-        wordcloud_df = pd.read_csv(r"D:\ml project\house price prediction\datasets\wordcloud.csv")
+        with open("datasets/feature_text.pkl", "rb") as f:
+            feature_text = pickle.load(f)
+
+        new_df = pd.read_csv("datasets/data_viz1.csv")
+        wordcloud_df = pd.read_csv("datasets/wordcloud.csv")
+
         return feature_text, new_df, wordcloud_df
     except Exception as e:
         st.error(f"❌ Error loading data: {e}")
         return None, None, None
+
 
 feature_text, new_df, wordcloud_df = load_data()
 if new_df is None:
