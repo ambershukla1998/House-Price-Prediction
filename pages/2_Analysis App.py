@@ -429,7 +429,6 @@
 # else:
 #     st.warning("No properties match the selected filters.")
 
-
 import os
 import pickle
 import numpy as np
@@ -438,52 +437,41 @@ import streamlit as st
 import plotly.express as px
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
-import joblib
-from pathlib import Path
+import traceback
 
 # --- App Configuration ---
 st.set_page_config(page_title="🏡 House Price Insights", layout="wide")
 st.title("📊 House Price Analytics Dashboard")
+st.caption("📂 Loading from: datasets")
 
-# --- Load Data Section ---
-@st.cache_data
+# --- Load Data Function ---
 def load_data():
+    dataset_path = "datasets"
     try:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        data_dir = os.path.normpath(os.path.join(base_dir, "..", "datasets"))
+        with open(os.path.join(dataset_path, "feature_text.pkl"), "rb") as f:
+            feature_text = pickle.load(f, encoding='latin1')
 
-        st.write("📂 Loading from:", data_dir)
-        file_path = os.path.join(data_dir, "feature_text.pkl")
-        st.write("🔑 Trying to load:", file_path)
-
-        # Debug: check if file exists
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"File not found: {file_path}")
-
-        # Try reading the pkl file
-        feature_text = joblib.load(file_path)
-        new_df = pd.read_csv(os.path.join(data_dir, "data_viz1.csv"))
-        wordcloud_df = pd.read_csv(os.path.join(data_dir, "wordcloud.csv"))
+        new_df = pd.read_csv(os.path.join(dataset_path, "data_viz1.csv"))
+        wordcloud_df = pd.read_csv(os.path.join(dataset_path, "wordcloud.csv"))
 
         return feature_text, new_df, wordcloud_df
 
     except Exception as e:
-        import traceback
-        st.error(f"❌ Error loading data: {str(e)}")
-        st.code(traceback.format_exc(), language='python')
-        return None, None, None
+        return e, None, None
 
-
-# Load Data
-feature_text, new_df, wordcloud_df = load_data()
-if new_df is None:
+# --- Load Data ---
+result = load_data()
+if isinstance(result[0], Exception):
+    st.error(f"❌ Error loading data: {result[0]}")
+    st.code(''.join(traceback.format_exception_only(type(result[0]), result[0])), language='python')
     st.stop()
+else:
+    feature_text, new_df, wordcloud_df = result
 
 # --- Sidebar Filters ---
 st.sidebar.header("🔧 Filters")
 property_types = st.sidebar.multiselect("Select Property Types", new_df['property_type'].unique(), default=new_df['property_type'].unique())
 price_range = st.sidebar.slider("Select Price Range", int(new_df['price'].min()), int(new_df['price'].max()), (int(new_df['price'].min()), int(new_df['price'].max())))
-
 filtered_df = new_df[(new_df['property_type'].isin(property_types)) & (new_df['price'].between(price_range[0], price_range[1]))]
 
 # --- Sector Price GeoMap ---
@@ -524,10 +512,8 @@ prop_type_opt = st.selectbox("Property Type", ['flat', 'house'], key="pie_proper
 df_pie = new_df[(new_df['property_type'] == prop_type_opt)]
 if sector_opt != 'overall':
     df_pie = df_pie[df_pie['sector'] == sector_opt]
-
 bhk_counts = df_pie['bedRoom'].value_counts().reset_index()
 bhk_counts.columns = ['bedRoom', 'count']
-
 if bhk_counts.empty:
     st.warning("No data available for this selection.")
 else:
@@ -542,7 +528,6 @@ scatter_type = st.selectbox("Property Type", ['flat', 'house'], key="scatter_typ
 df_scatter = new_df[(new_df['property_type'] == scatter_type)]
 if scatter_sector != 'overall':
     df_scatter = df_scatter[df_scatter['sector'] == scatter_sector]
-
 if df_scatter.empty:
     st.warning("No data found for selected options.")
 else:
