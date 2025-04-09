@@ -446,29 +446,37 @@ st.title("📊 House Price Analytics Dashboard")
 # --- Load Data Function ---
 def load_data():
     try:
-        # Attempt to load from root directory
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(base_path, "feature_text.pkl"), "rb") as f:
+        # Get current working directory where Streamlit runs
+        cwd = os.getcwd()
+        st.caption(f"📂 Loading from: {cwd}")
+
+        # Try loading from current working directory
+        with open(os.path.join(cwd, "feature_text.pkl"), "rb") as f:
             feature_text = pickle.load(f, encoding='latin1')
-        new_df = pd.read_csv(os.path.join(base_path, "data_viz1.csv"))
-        wordcloud_df = pd.read_csv(os.path.join(base_path, "wordcloud.csv"))
+
+        new_df = pd.read_csv(os.path.join(cwd, "data_viz1.csv"))
+        wordcloud_df = pd.read_csv(os.path.join(cwd, "wordcloud.csv"))
+
         return feature_text, new_df, wordcloud_df
 
     except Exception as e:
         try:
-            # Fallback to absolute directory in case __file__ logic fails (for IDE/streamlit dev server)
-            base_path = r"D:\ml project\house price prediction"
-            with open(os.path.join(base_path, "feature_text.pkl"), "rb") as f:
+            # Fallback to absolute path
+            fallback_path = os.path.join("D:", os.sep, "ml project", "house price prediction")
+            st.caption(f"🔄 Trying fallback path: {fallback_path}")
+
+            with open(os.path.join(fallback_path, "feature_text.pkl"), "rb") as f:
                 feature_text = pickle.load(f, encoding='latin1')
-            new_df = pd.read_csv(os.path.join(base_path, "data_viz1.csv"))
-            wordcloud_df = pd.read_csv(os.path.join(base_path, "wordcloud.csv"))
+
+            new_df = pd.read_csv(os.path.join(fallback_path, "data_viz1.csv"))
+            wordcloud_df = pd.read_csv(os.path.join(fallback_path, "wordcloud.csv"))
+
             return feature_text, new_df, wordcloud_df
+
         except Exception as e:
             return e, None, None
 
-
 # --- Load Data ---
-st.caption("📂 Loading from: root directory")
 result = load_data()
 
 if isinstance(result[0], Exception):
