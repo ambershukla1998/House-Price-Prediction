@@ -272,25 +272,21 @@
 #     st.warning("No data available for the selected filters.")
 #
 
-# import os
-# import pickle
-# import numpy as np
-# import pandas as pd
-# import streamlit as st
-# import plotly.express as px
-# from wordcloud import WordCloud
-# import matplotlib.pyplot as plt
-#
-# # --- App Configuration ---
-# st.set_page_config(page_title="🏡 House Price Insights", layout="wide")
-# st.title("📊 House Price Analytics Dashboard")
-#
-# # --- Load Data Section ---
-#
-#
+import os
 import pickle
-
+import numpy as np
 import pandas as pd
+import streamlit as st
+import plotly.express as px
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+# --- App Configuration ---
+st.set_page_config(page_title="🏡 House Price Insights", layout="wide")
+st.title("📊 House Price Analytics Dashboard")
+
+# --- Load Data Section ---
+
 import joblib
 from pathlib import Path
 import streamlit as st
