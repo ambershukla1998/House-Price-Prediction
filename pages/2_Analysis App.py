@@ -460,7 +460,6 @@ def load_data():
 
     except Exception as e:
         try:
-            # Fallback for local absolute path
             dataset_path = r"D:\ml project\house price prediction\datasets"
             with open(os.path.join(dataset_path, "feature_text.pkl"), "rb") as f:
                 feature_text = pickle.load(f, encoding='latin1')
@@ -473,6 +472,8 @@ def load_data():
 # --- Load Data ---
 st.caption("📂 Loading from: datasets")
 result = load_data()
+
+# Check if data loaded successfully
 if isinstance(result[0], Exception):
     st.error(f"❌ Error loading data: {result[0]}")
     st.code(''.join(traceback.format_exception_only(type(result[0]), result[0])), language='python')
