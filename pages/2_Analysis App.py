@@ -444,13 +444,18 @@ st.set_page_config(page_title="🏡 House Price Insights", layout="wide")
 st.title("📊 House Price Analytics Dashboard")
 
 # --- Load Data Function ---
+import os
+import pickle
+import pandas as pd
+import streamlit as st
+import traceback
+
 def load_data():
     try:
-        # Get current working directory where Streamlit runs
+        # Load from root directory where Streamlit is running
         cwd = os.getcwd()
         st.caption(f"📂 Loading from: {cwd}")
 
-        # Try loading from current working directory
         with open(os.path.join(cwd, "feature_text.pkl"), "rb") as f:
             feature_text = pickle.load(f, encoding='latin1')
 
@@ -461,7 +466,7 @@ def load_data():
 
     except Exception as e:
         try:
-            # Fallback to absolute path
+            # Fallback to correct absolute path (for Windows)
             fallback_path = os.path.join("D:", os.sep, "ml project", "house price prediction")
             st.caption(f"🔄 Trying fallback path: {fallback_path}")
 
@@ -477,6 +482,7 @@ def load_data():
             return e, None, None
 
 # --- Load Data ---
+st.header("📊 House Price Analytics Dashboard")
 result = load_data()
 
 if isinstance(result[0], Exception):
@@ -485,6 +491,7 @@ if isinstance(result[0], Exception):
     st.stop()
 else:
     feature_text, new_df, wordcloud_df = result
+
 
 # --- Sidebar Filters ---
 st.sidebar.header("🔧 Filters")
