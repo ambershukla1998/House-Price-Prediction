@@ -272,6 +272,164 @@
 #     st.warning("No data available for the selected filters.")
 #
 
+# import os
+# import pickle
+# import numpy as np
+# import pandas as pd
+# import streamlit as st
+# import plotly.express as px
+# from wordcloud import WordCloud
+# import matplotlib.pyplot as plt
+#
+# # --- App Configuration ---
+# st.set_page_config(page_title="🏡 House Price Insights", layout="wide")
+# st.title("📊 House Price Analytics Dashboard")
+#
+# # --- Load Data Section ---
+#
+#
+# import pickle
+#
+# import pandas as pd
+# import joblib
+# from pathlib import Path
+# import streamlit as st
+#
+# @st.cache_data
+# def load_data():
+#     try:
+#         data_dir = Path(__file__).resolve().parent.parent / "datasets"
+#
+#         st.write("📂 Loading from:", data_dir)
+#         st.write("🔑 Trying to load:", data_dir / "feature_text.pkl")
+#
+#         # ✅ Use joblib instead of pickle
+#         feature_text = joblib.load(data_dir / "feature_text.pkl")
+#
+#         new_df = pd.read_csv(data_dir / "data_viz1.csv")
+#         wordcloud_df = pd.read_csv(data_dir / "wordcloud.csv")
+#
+#         return feature_text, new_df, wordcloud_df
+#
+#     except Exception as e:
+#         st.error(f"❌ Error loading data: {e}")
+#         return None, None, None
+#
+#
+#
+# feature_text, new_df, wordcloud_df = load_data()
+# if new_df is None:
+#     st.stop()
+#
+# # --- Sidebar Filters ---
+# st.sidebar.header("🔧 Filters")
+# property_types = st.sidebar.multiselect("Select Property Types", new_df['property_type'].unique(), default=new_df['property_type'].unique())
+# price_range = st.sidebar.slider("Select Price Range", int(new_df['price'].min()), int(new_df['price'].max()), (int(new_df['price'].min()), int(new_df['price'].max())))
+#
+# filtered_df = new_df[(new_df['property_type'].isin(property_types)) & (new_df['price'].between(price_range[0], price_range[1]))]
+#
+# # --- Sector Price GeoMap ---
+# st.subheader("🗺️ Price per Sqft Across Sectors")
+# group_df = new_df.groupby('sector')[['price', 'price_per_sqft', 'built_up_area', 'latitude', 'longitude']].mean().reset_index()
+# fig_geo = px.scatter_mapbox(
+#     group_df,
+#     lat="latitude", lon="longitude",
+#     color="price_per_sqft", size="built_up_area",
+#     color_continuous_scale=px.colors.sequential.Viridis,
+#     hover_name="sector", zoom=10,
+#     mapbox_style="open-street-map",
+#     width=1200, height=650
+# )
+# st.plotly_chart(fig_geo, use_container_width=True)
+#
+# # --- Word Cloud ---
+# st.subheader("☁️ Word Cloud of Features by Sector")
+# selected_sector = st.selectbox("Choose a sector", wordcloud_df['sector'].unique())
+# text_data = " ".join(wordcloud_df[wordcloud_df['sector'] == selected_sector]['features'].astype(str))
+# wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_data)
+# fig_wc, ax = plt.subplots(figsize=(10, 5))
+# ax.imshow(wordcloud, interpolation="bilinear")
+# ax.axis("off")
+# st.pyplot(fig_wc)
+#
+# # --- Area vs Price ---
+# st.subheader("📐 Area vs Price Scatter")
+# property_type = st.radio("Select Property Type", ['flat', 'house'], horizontal=True)
+# df_plot = new_df[new_df['property_type'] == property_type]
+# fig_area = px.scatter(df_plot, x="built_up_area", y="price", color="bedRoom", title=f"Area vs Price for {property_type.title()}s")
+# st.plotly_chart(fig_area, use_container_width=True)
+#
+# # --- Pie Chart: BHK Distribution ---
+# st.subheader("🥧 BHK Distribution")
+# sector_opt = st.selectbox("Choose Sector", ['overall'] + sorted(new_df['sector'].unique()))
+# prop_type_opt = st.selectbox("Property Type", ['flat', 'house'], key="pie_property")
+# df_pie = new_df[(new_df['property_type'] == prop_type_opt)]
+# if sector_opt != 'overall':
+#     df_pie = df_pie[df_pie['sector'] == sector_opt]
+#
+# bhk_counts = df_pie['bedRoom'].value_counts().reset_index()
+# bhk_counts.columns = ['bedRoom', 'count']
+#
+# if bhk_counts.empty:
+#     st.warning("No data available for this selection.")
+# else:
+#     fig_pie = px.pie(bhk_counts, names='bedRoom', values='count', hole=0.4,
+#                      title=f"BHK Distribution for {sector_opt} ({prop_type_opt})")
+#     st.plotly_chart(fig_pie, use_container_width=True)
+#
+# # --- BHK vs Price Scatter ---
+# st.subheader("📊 BHK vs Price Scatter Plot")
+# scatter_sector = st.selectbox("Sector", ['overall'] + sorted(new_df['sector'].unique()), key="scatter_sector")
+# scatter_type = st.selectbox("Property Type", ['flat', 'house'], key="scatter_type")
+# df_scatter = new_df[(new_df['property_type'] == scatter_type)]
+# if scatter_sector != 'overall':
+#     df_scatter = df_scatter[df_scatter['sector'] == scatter_sector]
+#
+# if df_scatter.empty:
+#     st.warning("No data found for selected options.")
+# else:
+#     fig_scatter = px.scatter(df_scatter, x='bedRoom', y='price', color='sector',
+#                              size='built_up_area', hover_data=['price_per_sqft'],
+#                              title=f"{scatter_type.title()}s in {scatter_sector}")
+#     st.plotly_chart(fig_scatter, use_container_width=True)
+#
+# # --- Box Plot: Price Comparison by BHK ---
+# st.subheader("🪟 BHK-wise Price Comparison")
+# fig_box = px.box(new_df[new_df['bedRoom'] <= 4], x='bedRoom', y='price',
+#                  title='BHK-wise Price Range (≤ 4 BHK)',
+#                  labels={'bedRoom': 'Number of Bedrooms', 'price': 'Price'})
+# st.plotly_chart(fig_box, use_container_width=True)
+#
+# # --- Price Density Histogram ---
+# st.subheader("📈 Price Distribution & Density")
+# fig_hist = px.histogram(
+#     filtered_df,
+#     x='price',
+#     color='property_type',
+#     nbins=50,
+#     marginal='violin',
+#     histnorm='density',
+#     title='Price Density by Property Type',
+#     opacity=0.75
+# )
+# fig_hist.update_layout(bargap=0.1)
+# fig_hist.update_xaxes(rangeslider_visible=True)
+# st.plotly_chart(fig_hist, use_container_width=True)
+#
+# # --- Summary Statistics ---
+# if not filtered_df.empty:
+#     avg_price = filtered_df['price'].mean()
+#     st.markdown(f"""
+#     #### 📌 Summary:
+#     - **Properties Displayed:** {len(filtered_df)}
+#     - **Average Price:** ₹{avg_price:,.2f}
+#     - **Max Price:** ₹{filtered_df['price'].max():,.2f}
+#     - **Min Price:** ₹{filtered_df['price'].min():,.2f}
+#     """)
+# else:
+#     st.warning("No properties match the selected filters.")
+
+
 import os
 import pickle
 import numpy as np
@@ -280,34 +438,27 @@ import streamlit as st
 import plotly.express as px
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import joblib
+from pathlib import Path
 
 # --- App Configuration ---
 st.set_page_config(page_title="🏡 House Price Insights", layout="wide")
 st.title("📊 House Price Analytics Dashboard")
 
 # --- Load Data Section ---
-
-
-import pickle
-
-import pandas as pd
-import joblib
-from pathlib import Path
-import streamlit as st
-
 @st.cache_data
 def load_data():
     try:
-        data_dir = Path(__file__).resolve().parent.parent / "datasets"
+        # ✅ Adjusted for Windows path safety
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        data_dir = os.path.normpath(os.path.join(base_dir, "..", "datasets"))
 
         st.write("📂 Loading from:", data_dir)
-        st.write("🔑 Trying to load:", data_dir / "feature_text.pkl")
+        st.write("🔑 Trying to load:", os.path.join(data_dir, "feature_text.pkl"))
 
-        # ✅ Use joblib instead of pickle
-        feature_text = joblib.load(data_dir / "feature_text.pkl")
-
-        new_df = pd.read_csv(data_dir / "data_viz1.csv")
-        wordcloud_df = pd.read_csv(data_dir / "wordcloud.csv")
+        feature_text = joblib.load(os.path.join(data_dir, "feature_text.pkl"))
+        new_df = pd.read_csv(os.path.join(data_dir, "data_viz1.csv"))
+        wordcloud_df = pd.read_csv(os.path.join(data_dir, "wordcloud.csv"))
 
         return feature_text, new_df, wordcloud_df
 
@@ -315,8 +466,7 @@ def load_data():
         st.error(f"❌ Error loading data: {e}")
         return None, None, None
 
-
-
+# Load Data
 feature_text, new_df, wordcloud_df = load_data()
 if new_df is None:
     st.stop()
