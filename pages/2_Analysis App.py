@@ -446,34 +446,21 @@ st.title("📊 House Price Analytics Dashboard")
 # --- Load Data Function ---
 def load_data():
     try:
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        parent_dir = os.path.dirname(current_dir)
-        dataset_path = os.path.join(parent_dir, "datasets")
-
-        with open(os.path.join(dataset_path, "feature_text.pkl"), "rb") as f:
+        with open("feature_text.pkl", "rb") as f:
             feature_text = pickle.load(f, encoding='latin1')
 
-        new_df = pd.read_csv(os.path.join(dataset_path, "data_viz1.csv"))
-        wordcloud_df = pd.read_csv(os.path.join(dataset_path, "wordcloud.csv"))
+        new_df = pd.read_csv("data_viz1.csv")
+        wordcloud_df = pd.read_csv("wordcloud.csv")
 
         return feature_text, new_df, wordcloud_df
 
     except Exception as e:
-        try:
-            dataset_path = r"D:\ml project\house price prediction\datasets"
-            with open(os.path.join(dataset_path, "feature_text.pkl"), "rb") as f:
-                feature_text = pickle.load(f, encoding='latin1')
-            new_df = pd.read_csv(os.path.join(dataset_path, "data_viz1.csv"))
-            wordcloud_df = pd.read_csv(os.path.join(dataset_path, "wordcloud.csv"))
-            return feature_text, new_df, wordcloud_df
-        except Exception as e:
-            return e, None, None
+        return e, None, None
 
 # --- Load Data ---
-st.caption("📂 Loading from: datasets")
+st.caption("📂 Loading from: root directory")
 result = load_data()
 
-# Check if data loaded successfully
 if isinstance(result[0], Exception):
     st.error(f"❌ Error loading data: {result[0]}")
     st.code(''.join(traceback.format_exception_only(type(result[0]), result[0])), language='python')
