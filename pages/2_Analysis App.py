@@ -449,22 +449,30 @@ st.title("📊 House Price Analytics Dashboard")
 @st.cache_data
 def load_data():
     try:
-        # ✅ Adjusted for Windows path safety
         base_dir = os.path.dirname(os.path.abspath(__file__))
         data_dir = os.path.normpath(os.path.join(base_dir, "..", "datasets"))
 
         st.write("📂 Loading from:", data_dir)
-        st.write("🔑 Trying to load:", os.path.join(data_dir, "feature_text.pkl"))
+        file_path = os.path.join(data_dir, "feature_text.pkl")
+        st.write("🔑 Trying to load:", file_path)
 
-        feature_text = joblib.load(os.path.join(data_dir, "feature_text.pkl"))
+        # Debug: check if file exists
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+        # Try reading the pkl file
+        feature_text = joblib.load(file_path)
         new_df = pd.read_csv(os.path.join(data_dir, "data_viz1.csv"))
         wordcloud_df = pd.read_csv(os.path.join(data_dir, "wordcloud.csv"))
 
         return feature_text, new_df, wordcloud_df
 
     except Exception as e:
-        st.error(f"❌ Error loading data: {e}")
+        import traceback
+        st.error(f"❌ Error loading data: {str(e)}")
+        st.code(traceback.format_exc(), language='python')
         return None, None, None
+
 
 # Load Data
 feature_text, new_df, wordcloud_df = load_data()
