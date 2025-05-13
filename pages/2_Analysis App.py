@@ -300,6 +300,10 @@ def load_data():
         # st.write("🔑 Trying to load:", data_dir / "feature_text.pkl")
 
         data_dir = Path.cwd() / "datasets"
+        file_path = data_dir / "feature_text.pkl"
+
+        st.write("🔍 Looking for:", file_path)
+        st.write("📂 Exists?", file_path.exists())
 
         st.write("📂 Loading from:", data_dir)
         st.write("🔑 Trying to load:", data_dir / "feature_text.pkl")
