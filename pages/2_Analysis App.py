@@ -280,6 +280,7 @@ import streamlit as st
 import plotly.express as px
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import traceback
 
 # --- App Configuration ---
 st.set_page_config(page_title="🏡 House Price Insights", layout="wide")
@@ -318,6 +319,7 @@ def load_data():
 
     except Exception as e:
         st.error(f"❌ Error loading data: {e}")
+        st.text(traceback.format_exc())
         return None, None, None
 
 
