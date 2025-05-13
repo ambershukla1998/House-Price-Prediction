@@ -294,7 +294,12 @@ import streamlit as st
 @st.cache_data
 def load_data():
     try:
-        data_dir = Path(__file__).resolve().parent.parent / "datasets"
+        # data_dir = Path(__file__).resolve().parent.parent / "datasets"
+        #
+        # st.write("📂 Loading from:", data_dir)
+        # st.write("🔑 Trying to load:", data_dir / "feature_text.pkl")
+
+        data_dir = Path.cwd() / "datasets"
 
         st.write("📂 Loading from:", data_dir)
         st.write("🔑 Trying to load:", data_dir / "feature_text.pkl")
